@@ -42,20 +42,20 @@ export const SubscriptionList = ({ subscriptions, onEditClick }) => {
   };
 
   return (
-    <div className="overflow-x-auto card p-0">
-      <table className="w-full">
-        <thead className="bg-gray-50 dark:bg-dark-bg border-b border-gray-200 dark:border-dark-border">
+    <div className="overflow-x-auto card p-0 shadow-sm rounded-xl border border-gray-200 dark:border-dark-border">
+      <table className="w-full text-left border-collapse">
+        <thead className="bg-gray-100/50 dark:bg-dark-bg/50 border-b border-gray-200 dark:border-dark-border">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Service Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Category</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Cost</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Billing</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Renewal Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-dark-text-secondary uppercase tracking-wider">Actions</th>
+            <th className="px-6 py-4 text-xs font-extold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Service Name</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Category</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Cost</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Billing</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Renewal Date</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest">Status</th>
+            <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-dark-text-secondary uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-dark-border">
+        <tbody className="divide-y divide-gray-100 dark:divide-dark-border bg-white dark:bg-dark-bg-secondary">
           {subscriptions.map((subscription) => {
             const daysLeft = daysUntilRenewal(subscription.renewalDate);
             const renewalWarning = isRenewalSoon(subscription.renewalDate, 30);
@@ -63,56 +63,56 @@ export const SubscriptionList = ({ subscriptions, onEditClick }) => {
             return (
               <tr
                 key={subscription.id}
-                className="hover:bg-gray-50 dark:hover:bg-dark-bg-secondary transition-colors"
+                className="hover:bg-blue-50/30 dark:hover:bg-white/5 transition-colors group"
               >
-                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-dark-text">
+                <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">
                   {subscription.serviceName}
                 </td>
                 <td className="px-6 py-4 text-sm">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(subscription.category)}`}>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide ${getCategoryColor(subscription.category)}`}>
                     {subscription.category}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text font-semibold">
+                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-bold">
                   {formatCurrency(subscription.cost, subscription.currency || 'USD')}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-text-secondary">
-                  <span className="capitalize text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">
+                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  <span className="capitalize text-[11px] font-bold tracking-wider bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md">
                     {subscription.billingCycle}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-900 dark:text-dark-text">
+                    <span className="text-gray-700 dark:text-gray-200 font-medium">
                       {formatDate(subscription.renewalDate)}
                     </span>
                     {renewalWarning && (
-                      <AlertCircle className="w-4 h-4 text-orange-500" />
+                      <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
                     )}
                     {daysLeft <= 7 && (
-                      <span className="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 px-2 py-1 rounded">
+                      <span className="text-[10px] uppercase font-bold tracking-wider rounded-md bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-2 py-0.5">
                         {daysLeft} days
                       </span>
                     )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(subscription.status)}`}>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wide ${getStatusBadge(subscription.status)}`}>
                     {subscription.status === 'active' ? '✓ Active' : '⊘ Paused'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex items-center gap-2">
+                <td className="px-6 py-4 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleEdit(subscription)}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1"
+                      className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleToggleStatus(subscription.id)}
-                      className={`p-1 ${subscription.status === 'active' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}`}
+                      className={`p-1.5 rounded-md transition-colors ${subscription.status === 'active' ? 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30' : 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
                       title={subscription.status === 'active' ? 'Pause' : 'Resume'}
                     >
                       {subscription.status === 'active' ? (
@@ -123,7 +123,7 @@ export const SubscriptionList = ({ subscriptions, onEditClick }) => {
                     </button>
                     <button
                       onClick={() => handleDelete(subscription.id)}
-                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1"
+                      className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
