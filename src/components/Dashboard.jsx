@@ -6,6 +6,7 @@ import { FilterBar } from './FilterBar';
 import { StatsCard } from './StatsCard';
 import { BudgetAlerts } from './BudgetAlerts';
 import { UpcomingRenewals } from './UpcomingRenewals';
+import { ExportButton } from './ExportButton';
 import { DollarSign, TrendingUp, Clock, Settings2 } from 'lucide-react';
 
 export const Dashboard = ({ onAddClick, onEditClick }) => {
@@ -37,7 +38,8 @@ export const Dashboard = ({ onAddClick, onEditClick }) => {
             Track and manage all your software subscriptions
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap justify-end">
+          <ExportButton />
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="btn-secondary flex items-center gap-2"
