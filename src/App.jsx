@@ -1,28 +1,48 @@
-import { useReducer, useEffect } from 'react'
+import { useReducer, useEffect, useState } from 'react'
 import { SubscriptionProvider } from './context/SubscriptionContext'
 import { subscriptionReducer, initialState } from './context/SubscriptionReducer'
 import { useLocalStorage, useTheme } from './hooks/useLocalStorage'
+import { MainLayout } from './components/MainLayout'
+import { Dashboard } from './components/Dashboard'
+import { SubscriptionModal } from './components/SubscriptionModal'
 import './App.css'
 
 function AppContent() {
+  const [editingSubscription, setEditingSubscription] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+
+  const handleAddClick = () => {
+    setEditingSubscription(null)
+    setShowModal(true)
+  }
+
+  const handleEditClick = (subscription) => {
+    setEditingSubscription(subscription)
+    setShowModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditingSubscription(null)
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-dark-text mb-8">
-          SaaS Subscription Manager
-        </h1>
-        <p className="text-gray-600 dark:text-dark-text-secondary">
-          Manage and track your software subscriptions efficiently.
-        </p>
-      </div>
-    </div>
+    <MainLayout>
+      <Dashboard onAddClick={handleAddClick} onEditClick={handleEditClick} />
+      {showModal && (
+        <SubscriptionModal
+          subscription={editingSubscription}
+          onClose={handleCloseModal}
+        />
+      )}
+    </MainLayout>
   )
 }
 
 function App() {
   const [state, dispatch] = useReducer(subscriptionReducer, initialState)
   const saveToStorage = useLocalStorage('subscriptionState', initialState, dispatch)
-  const { theme, setTheme } = useTheme()
+  const { theme } = useTheme()
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -40,10 +60,3 @@ function App() {
 
 export default App
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
-
-export default App
