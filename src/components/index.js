@@ -6,4 +6,6 @@ export { StatsCard } from './StatsCard';
 export { MainLayout } from './MainLayout';
 export { BudgetAlerts } from './BudgetAlerts';
 export { UpcomingRenewals } from './UpcomingRenewals';
+export { ExportButton } from './ExportButton';
+
 
