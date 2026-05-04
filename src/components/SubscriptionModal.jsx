@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 
 const categoryOptions = ['Productivity', 'Design', 'Communication', 'Analytics', 'Security', 'Storage', 'Other'];
 const billingCycleOptions = ['monthly', 'yearly'];
-const currencyOptions = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'INR'];
+const currencyOptions = ['USD', 'EUR', 'MDL'];
 
 export const SubscriptionModal = ({ subscription, onClose }) => {
   const { dispatch } = useSubscription();
