@@ -7,5 +7,6 @@ export { MainLayout } from './MainLayout';
 export { BudgetAlerts } from './BudgetAlerts';
 export { UpcomingRenewals } from './UpcomingRenewals';
 export { ExportButton } from './ExportButton';
+export { ApiTracker } from './ApiTracker';
 
 
