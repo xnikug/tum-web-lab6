@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSubscription } from '../hooks/useSubscription';
-import { Search, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 
 export const FilterBar = ({ categories }) => {
   const { state, dispatch } = useSubscription();
@@ -37,13 +37,12 @@ export const FilterBar = ({ categories }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search subscriptions..."
             value={filters.searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="input-field pl-10"
+            className="input-field"
           />
         </div>
 
