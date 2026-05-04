@@ -42,25 +42,21 @@ export const MainLayout = ({ children }) => {
 
           {/* Nav Links */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="#" className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white">
+            <button onClick={() => window.location.hash = ''} className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-900 dark:text-white ${!window.location.hash || window.location.hash === '#/' ? 'bg-gray-100 dark:bg-gray-800/80' : 'hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors'}`}>
               <LayoutDashboard className="w-4 h-4 mr-3" />
               Dashboard
-            </a>
-            <a href="#" className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors">
+            </button>
+            <button onClick={() => window.location.hash = '#/api-keys'} className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 ${window.location.hash === '#/api-keys' ? 'bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white' : 'hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors'}`}>
               <CreditCard className="w-4 h-4 mr-3" />
-              Subscriptions
-            </a>
-            <a href="#" className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors">
-              <PieChart className="w-4 h-4 mr-3" />
-              Analytics
-            </a>
-            <a href="#" className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors">
+              API Usage
+            </button>
+            <button onClick={() => window.location.hash = '#/renewals'} className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 ${window.location.hash === '#/renewals' ? 'bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white' : 'hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors'}`}>
               <Bell className="w-4 h-4 mr-3" />
-              Alerts
+              Alerts & Renewals
               <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                 3
               </span>
-            </a>
+            </button>
           </nav>
 
           {/* Bottom actions */}
