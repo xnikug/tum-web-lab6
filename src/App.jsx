@@ -5,11 +5,22 @@ import { useLocalStorage, useTheme } from './hooks/useLocalStorage'
 import { MainLayout } from './components/MainLayout'
 import { Dashboard } from './components/Dashboard'
 import { SubscriptionModal } from './components/SubscriptionModal'
+import { ApiKeysPage } from './pages/ApiKeysPage'
+import { RenewalsPage } from './pages/RenewalsPage'
 import './App.css'
 
 function AppContent() {
   const [editingSubscription, setEditingSubscription] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [currentHash, setCurrentHash] = useState(window.location.hash)
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentHash(window.location.hash);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleAddClick = () => {
     setEditingSubscription(null)
@@ -26,9 +37,19 @@ function AppContent() {
     setEditingSubscription(null)
   }
 
+  const renderContent = () => {
+    if (currentHash === '#/api-keys') {
+      return <ApiKeysPage />;
+    }
+    if (currentHash === '#/renewals') {
+      return <RenewalsPage />;
+    }
+    return <Dashboard onAddClick={handleAddClick} onEditClick={handleEditClick} />;
+  }
+
   return (
     <MainLayout>
-      <Dashboard onAddClick={handleAddClick} onEditClick={handleEditClick} />
+      {renderContent()}
       {showModal && (
         <SubscriptionModal
           subscription={editingSubscription}
