@@ -5,7 +5,6 @@ import { SubscriptionList } from './SubscriptionList';
 import { FilterBar } from './FilterBar';
 import { StatsCard } from './StatsCard';
 import { BudgetAlerts } from './BudgetAlerts';
-import { UpcomingRenewals } from './UpcomingRenewals';
 import { ExportButton } from './ExportButton';
 import { DollarSign, TrendingUp, Clock, Settings2 } from 'lucide-react';
 
@@ -108,11 +107,11 @@ export const Dashboard = ({ onAddClick, onEditClick }) => {
       <FilterBar categories={getCategories(subscriptions)} />
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Subscription List (2/3 width) */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6">
+        {/* Subscription List (Full width) */}
+        <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               Subscriptions ({filteredSubscriptions.length})
             </h2>
           </div>
@@ -122,17 +121,12 @@ export const Dashboard = ({ onAddClick, onEditClick }) => {
               onEditClick={onEditClick}
             />
           ) : (
-            <div className="card text-center py-12">
-              <p className="text-gray-600 dark:text-dark-text-secondary">
+            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400">
                 No subscriptions found. Try adjusting your filters or add a new subscription.
               </p>
             </div>
           )}
-        </div>
-
-        {/* Right Column: Sidebar (1/3 width) */}
-        <div className="space-y-6">
-          <UpcomingRenewals />
         </div>
       </div>
     </div>
