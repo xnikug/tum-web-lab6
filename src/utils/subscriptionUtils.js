@@ -2,13 +2,7 @@
 const exchangeRates = {
   USD: 1,
   EUR: 0.92,
-  GBP: 0.79,
-  JPY: 149.50,
-  AUD: 1.52,
-  CAD: 1.36,
-  CHF: 0.88,
-  CNY: 7.24,
-  INR: 83.12,
+  MDL: 17.75, // Sample exchange rate for MDL relative to USD
 };
 
 export const convertCurrency = (amount, fromCurrency, toCurrency) => {

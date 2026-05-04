@@ -27,38 +27,38 @@ export const Dashboard = ({ onAddClick, onEditClick }) => {
   const annualSpend = calculateAnnualSpend(activeSubscriptions, currency);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header Section */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">
-            Dashboard
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            Overview
           </h1>
-          <p className="text-gray-600 dark:text-dark-text-secondary">
-            Track and manage all your software subscriptions
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Track and manage your software subscriptions and optimize your budget.
           </p>
         </div>
-        <div className="flex gap-3 flex-wrap justify-end">
+        <div className="flex gap-3 flex-wrap items-center">
           <ExportButton />
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="btn-secondary flex items-center gap-2"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-gray-200 dark:border-gray-800 rounded-md bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-gray-800/80 text-gray-700 dark:text-gray-300 transition-colors shadow-sm"
           >
             <Settings2 className="w-4 h-4" />
             <span className="hidden sm:inline">Settings</span>
           </button>
           <button
             onClick={onAddClick}
-            className="btn-primary"
+            className="flex items-center gap-2 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
           >
-            + Add Subscription
+            + New Subscription
           </button>
         </div>
       </div>
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="card bg-gray-50 dark:bg-dark-bg">
+        <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4">Dashboard Settings</h3>
           <div className="max-w-xs">
             <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">

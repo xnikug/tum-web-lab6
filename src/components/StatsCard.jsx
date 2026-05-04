@@ -2,29 +2,24 @@ import React from 'react';
 
 export const StatsCard = ({ icon, title, value, trend, subtitle }) => {
   return (
-    <div className="card">
+    <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-dark-text-secondary mb-1">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
             {title}
           </p>
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-gray-900 dark:text-dark-text">
+            <p className="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight">
               {value}
             </p>
-            {trend && (
-              <span className="text-xs text-green-600 dark:text-green-400">
-                {trend}
-              </span>
-            )}
           </div>
           {subtitle && (
-            <p className="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               {subtitle}
             </p>
           )}
         </div>
-        <div className="text-blue-500 dark:text-blue-400">
+        <div className="p-2.5 bg-gray-50 dark:bg-gray-800/80 rounded-lg text-gray-600 dark:text-gray-300">
           {icon}
         </div>
       </div>
