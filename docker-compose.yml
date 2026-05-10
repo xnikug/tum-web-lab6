@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       lab7
+      POSTGRES_USER:     lab7user
+      POSTGRES_PASSWORD: lab7pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab7user -d lab7"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://lab7user:lab7pass@db:5432/lab7
+      JWT_SECRET:   lab7-super-secret-key
+      PORT:         3001
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
