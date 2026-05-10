@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../hooks/useLocalStorage';
-import { Moon, Sun, LayoutDashboard, CreditCard, PieChart, Bell, Settings, LogOut, ChevronRight, Menu, X } from 'lucide-react';
+import { Moon, Sun, LayoutDashboard, CreditCard, Bell, Settings, ChevronRight, Menu } from 'lucide-react';
+import { ApiConnect } from './ApiConnect';
 
 export const MainLayout = ({ children }) => {
-  const { state, dispatch } = useSubscription();
+  const { state, dispatch, onApiConnect } = useSubscription();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -85,6 +86,7 @@ export const MainLayout = ({ children }) => {
                 <><Sun className="w-4 h-4 mr-3" /> Light Mode</>
               )}
             </button>
+            <ApiConnect onConnect={onApiConnect} />
             <a href="#" className="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors">
               <Settings className="w-4 h-4 mr-3" />
               Settings
