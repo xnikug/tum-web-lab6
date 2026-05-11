@@ -189,9 +189,9 @@ export function ApiConnect() {
                     onChange={e => setRole(e.target.value)}
                     className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                   >
-                    <option value="ADMIN">ADMIN — READ + WRITE + DELETE</option>
-                    <option value="WRITER">WRITER — READ + WRITE</option>
-                    <option value="VISITOR">VISITOR — READ only</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="WRITER">WRITER</option>
+                    <option value="VISITOR">VISITOR</option>
                   </select>
                   <button
                     onClick={handleGetToken}
