@@ -7,8 +7,11 @@ import { Dashboard } from './components/Dashboard'
 import { SubscriptionModal } from './components/SubscriptionModal'
 import { ApiKeysPage } from './pages/ApiKeysPage'
 import { RenewalsPage } from './pages/RenewalsPage'
+import { ToastContainer } from './components/Toast'
 import { api } from './services/api'
 import './App.css'
+
+let toastId = 0
 
 function AppContent() {
   const [editingSubscription, setEditingSubscription] = useState(null)
@@ -45,11 +48,19 @@ function App() {
   const [state, dispatch] = useReducer(subscriptionReducer, initialState)
   const saveToStorage     = useLocalStorage('subscriptionState', initialState, dispatch)
   const { theme }         = useTheme()
-
-  // 'idle' | 'connected' | 'expired' | 'error'
   const [apiStatus, setApiStatus] = useState('idle')
+  const [toasts, setToasts]       = useState([])
 
   useEffect(() => { saveToStorage(state) }, [state, saveToStorage])
+
+  const showToast = useCallback((message, type = 'info', duration = 4000) => {
+    const id = ++toastId
+    setToasts(prev => [...prev, { id, message, type, duration }])
+  }, [])
+
+  const dismissToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
 
   const loadFromApi = useCallback(async () => {
     if (!api.isConnected()) return
@@ -59,19 +70,14 @@ function App() {
         api.getApiKeys({ limit: 100 }),
         api.getApiUsage({ limit: 100 }),
       ])
-      // SYNC_FROM_API preserves currency/theme/filters — only updates data
       dispatch({
         type: 'SYNC_FROM_API',
-        payload: {
-          subscriptions: subs.data,
-          apiKeys:        keys.data,
-          apiUsages:      usage.data,
-        },
+        payload: { subscriptions: subs.data, apiKeys: keys.data, apiUsages: usage.data },
       })
       setApiStatus('connected')
     } catch (err) {
       if (err.status === 401) { api.clearToken(); setApiStatus('expired') }
-      else                    { setApiStatus('error') }
+      else { setApiStatus('error') }
     }
   }, [])
 
@@ -134,11 +140,28 @@ function App() {
           dispatch(action)
       }
     } catch (err) {
-      if (err.status === 401) { api.clearToken(); setApiStatus('expired') }
-      // Always apply locally so the UI never freezes
+      if (err.status === 403) {
+        // Permission denied — block the action, tell the user why
+        showToast(`Permission denied: ${err.message}`, 'error')
+        return
+      }
+      if (err.status === 401) {
+        // Token expired or invalid — block the action, prompt refresh
+        api.clearToken()
+        setApiStatus('expired')
+        showToast('Session expired — open Backend API in the sidebar to refresh your token.', 'warning', 6000)
+        return
+      }
+      if (err.status === 400) {
+        // Validation error — block the action, show what's wrong
+        showToast(`Validation error: ${err.message}`, 'error')
+        return
+      }
+      // Network / 5xx — apply locally as offline fallback
+      showToast('Backend unreachable — change saved locally only.', 'warning')
       dispatch(action)
     }
-  }, [])
+  }, [showToast])
 
   return (
     <SubscriptionProvider
@@ -150,6 +173,7 @@ function App() {
     >
       <div className={theme === 'dark' ? 'dark' : ''}>
         <AppContent />
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       </div>
     </SubscriptionProvider>
   )
