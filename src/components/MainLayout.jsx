@@ -3,9 +3,13 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useTheme } from '../hooks/useLocalStorage';
 import { Moon, Sun, LayoutDashboard, CreditCard, Bell, Settings, ChevronRight, Menu } from 'lucide-react';
 import { ApiConnect } from './ApiConnect';
+import { isRenewalSoon } from '../utils/subscriptionUtils';
 
 export const MainLayout = ({ children }) => {
   const { state, dispatch } = useSubscription();
+  const upcomingCount = state.subscriptions.filter(
+    s => s.status === 'active' && isRenewalSoon(s.renewalDate)
+  ).length;
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -54,9 +58,11 @@ export const MainLayout = ({ children }) => {
             <button onClick={() => window.location.hash = '#/renewals'} className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 ${window.location.hash === '#/renewals' ? 'bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white' : 'hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors'}`}>
               <Bell className="w-4 h-4 mr-3" />
               Alerts & Renewals
-              <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                3
-              </span>
+              {upcomingCount > 0 && (
+                <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                  {upcomingCount}
+                </span>
+              )}
             </button>
           </nav>
 
