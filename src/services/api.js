@@ -1,5 +1,7 @@
-const BASE_URL_KEY = 'api_base_url';
-const TOKEN_KEY    = 'api_token';
+const BASE_URL_KEY    = 'api_base_url';
+const TOKEN_KEY       = 'api_token';
+const TOKEN_ROLE_KEY  = 'api_token_role';   // role used to mint the current token
+const AUTO_REFRESH_KEY = 'api_auto_refresh'; // 'true' | 'false'
 
 function getBaseUrl() {
   return localStorage.getItem(BASE_URL_KEY) || 'http://localhost:3001';
@@ -30,11 +32,15 @@ async function request(method, path, body) {
 export const api = {
   // Config
   getBaseUrl,
-  setBaseUrl: url  => localStorage.setItem(BASE_URL_KEY, url),
+  setBaseUrl:      url  => localStorage.setItem(BASE_URL_KEY, url),
   getToken,
-  setToken:   tok  => localStorage.setItem(TOKEN_KEY, tok),
-  clearToken: ()   => localStorage.removeItem(TOKEN_KEY),
-  isConnected: ()  => !!getToken(),
+  setToken:        tok  => localStorage.setItem(TOKEN_KEY, tok),
+  clearToken:      ()   => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(TOKEN_ROLE_KEY); },
+  isConnected:     ()   => !!getToken(),
+  getTokenRole:    ()   => localStorage.getItem(TOKEN_ROLE_KEY) || 'ADMIN',
+  setTokenRole:    role => localStorage.setItem(TOKEN_ROLE_KEY, role),
+  getAutoRefresh:  ()   => localStorage.getItem(AUTO_REFRESH_KEY) === 'true',
+  setAutoRefresh:  val  => localStorage.setItem(AUTO_REFRESH_KEY, val ? 'true' : 'false'),
 
   // Auth
   fetchToken: role => request('POST', '/token', { role }),

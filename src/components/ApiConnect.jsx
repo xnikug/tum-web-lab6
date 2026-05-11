@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Wifi, WifiOff, RefreshCw, X, Key, Server, AlertTriangle } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, X, Key, Server, AlertTriangle, ToggleLeft, ToggleRight } from 'lucide-react';
 import { api } from '../services/api';
 import { useSubscription } from '../hooks/useSubscription';
 
@@ -14,20 +14,24 @@ function getTokenExpiry(token) {
 export function ApiConnect() {
   const { apiStatus, onApiConnect, onApiDisconnect } = useSubscription();
 
-  const [open,     setOpen]    = useState(false);
-  const [baseUrl,  setBaseUrl] = useState(api.getBaseUrl());
-  const [token,    setToken]   = useState(api.getToken() || '');
-  const [loading,  setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [role,     setRole]    = useState('ADMIN');
-  const [secsLeft, setSecsLeft] = useState(null); // token countdown
+  const [open,        setOpen]        = useState(false);
+  const [baseUrl,     setBaseUrl]     = useState(api.getBaseUrl());
+  const [token,       setToken]       = useState(api.getToken() || '');
+  const [loading,     setLoading]     = useState(false);
+  const [errorMsg,    setErrorMsg]    = useState('');
+  const [role,        setRole]        = useState(api.getTokenRole());
+  const [secsLeft,    setSecsLeft]    = useState(null);
+  const [autoRefresh, setAutoRefresh] = useState(api.getAutoRefresh());
 
-  // Sync token input with what's stored (e.g. after auto-clear on expiry)
+  // Prevent double-firing the auto-refresh
+  const refreshingRef = useRef(false);
+
+  // Clear local token state when App detects expiry via 401
   useEffect(() => {
     if (apiStatus === 'expired') { setToken(''); setSecsLeft(null); }
   }, [apiStatus]);
 
-  // Countdown timer for token expiry
+  // --- Countdown timer ---
   useEffect(() => {
     const stored = api.getToken();
     if (!stored) { setSecsLeft(null); return; }
@@ -43,6 +47,28 @@ export function ApiConnect() {
     return () => clearInterval(id);
   }, [token, apiStatus]);
 
+  // --- Silent auto-refresh (fires at 5 s remaining) ---
+  const silentRefresh = useCallback(async () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
+    try {
+      const currentRole = api.getTokenRole();
+      const res = await api.fetchToken(currentRole);
+      api.setToken(res.token);
+      setToken(res.token);
+      onApiConnect?.();
+    } catch {
+      // silent — let token expire naturally; App will catch the 401
+    } finally {
+      refreshingRef.current = false;
+    }
+  }, [onApiConnect]);
+
+  useEffect(() => {
+    if (autoRefresh && secsLeft === 5) silentRefresh();
+  }, [secsLeft, autoRefresh, silentRefresh]);
+
+  // --- Manual actions ---
   const checkConnection = useCallback(async () => {
     setLoading(true);
     setErrorMsg('');
@@ -61,6 +87,7 @@ export function ApiConnect() {
     setErrorMsg('');
     try {
       api.setBaseUrl(baseUrl);
+      api.setTokenRole(role);             // persist so auto-refresh reuses it
       const res = await api.fetchToken(role);
       api.setToken(res.token);
       setToken(res.token);
@@ -88,32 +115,36 @@ export function ApiConnect() {
     onApiDisconnect?.();
   }
 
-  // Derive display state
+  function handleToggleAutoRefresh() {
+    const next = !autoRefresh;
+    setAutoRefresh(next);
+    api.setAutoRefresh(next);
+  }
+
+  // --- Derived display state ---
   const isExpired   = apiStatus === 'expired' || secsLeft === 0;
   const isConnected = apiStatus === 'connected' && !isExpired;
   const isError     = apiStatus === 'error' || !!errorMsg;
+  const isWarning   = isConnected && secsLeft !== null && secsLeft <= 15;
 
   const dotClass = isConnected
-    ? 'bg-emerald-500'
-    : isExpired
-      ? 'bg-amber-400 animate-pulse'
-      : loading
-        ? 'bg-yellow-400 animate-pulse'
-        : 'bg-gray-400';
+    ? isWarning ? 'bg-amber-400' : 'bg-emerald-500'
+    : isExpired  ? 'bg-amber-400 animate-pulse'
+    : loading    ? 'bg-yellow-400 animate-pulse'
+    : 'bg-gray-400';
 
   const statusText = isConnected
     ? secsLeft !== null ? `Connected · ${secsLeft}s` : 'Connected'
-    : isExpired
-      ? 'Token expired — refresh'
-      : errorMsg || (apiStatus === 'error' ? 'Connection error' : 'Not connected');
+    : isExpired  ? 'Token expired — refresh'
+    : errorMsg || (apiStatus === 'error' ? 'Connection error' : 'Not connected');
 
   const statusClass = isConnected
-    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-    : isExpired
+    ? isWarning
       ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-      : isError
-        ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-        : 'bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
+      : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+    : isExpired ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+    : isError   ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+    : 'bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
 
   return (
     <>
@@ -123,12 +154,12 @@ export function ApiConnect() {
         className="w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors"
       >
         {isConnected
-          ? <Wifi className="w-4 h-4 mr-3 text-emerald-500" />
+          ? <Wifi className={`w-4 h-4 mr-3 ${isWarning ? 'text-amber-400' : 'text-emerald-500'}`} />
           : isExpired
             ? <AlertTriangle className="w-4 h-4 mr-3 text-amber-400" />
             : <WifiOff className="w-4 h-4 mr-3" />}
         <span>Backend API</span>
-        <span className={`ml-auto flex items-center gap-1.5`}>
+        <span className="ml-auto flex items-center gap-1.5">
           {isConnected && secsLeft !== null && (
             <span className={`text-xs font-mono ${secsLeft <= 15 ? 'text-amber-500' : 'text-emerald-500'}`}>
               {secsLeft}s
@@ -138,7 +169,7 @@ export function ApiConnect() {
         </span>
       </button>
 
-      {/* Modal — rendered via portal so the sidebar's CSS transform doesn't clip it */}
+      {/* Modal — portal escapes the sidebar's CSS transform stacking context */}
       {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-800">
@@ -160,8 +191,11 @@ export function ApiConnect() {
               <div className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg ${statusClass}`}>
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotClass}`} />
                 <span>{statusText}</span>
-                {isConnected && secsLeft !== null && secsLeft <= 15 && (
-                  <span className="ml-auto text-amber-600 dark:text-amber-400 font-semibold">Expiring soon!</span>
+                {isWarning && !autoRefresh && (
+                  <span className="ml-auto font-semibold">Expiring soon!</span>
+                )}
+                {isWarning && autoRefresh && (
+                  <span className="ml-auto font-semibold">Auto-refreshing…</span>
                 )}
               </div>
 
@@ -179,7 +213,7 @@ export function ApiConnect() {
                 />
               </div>
 
-              {/* Auto get token */}
+              {/* Role + Get token */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
                   {isExpired ? 'Token expired — get a new one' : 'Get token automatically'}
@@ -190,9 +224,9 @@ export function ApiConnect() {
                     onChange={e => setRole(e.target.value)}
                     className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                   >
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="WRITER">WRITER</option>
-                    <option value="VISITOR">VISITOR</option>
+                    <option value="ADMIN">ADMIN — READ + WRITE + DELETE</option>
+                    <option value="WRITER">WRITER — READ + WRITE</option>
+                    <option value="VISITOR">VISITOR — READ only</option>
                   </select>
                   <button
                     onClick={handleGetToken}
@@ -206,9 +240,27 @@ export function ApiConnect() {
                     {isExpired ? 'Refresh' : 'Get token'}
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Tokens expire in 60 s (demo mode).
-                </p>
+              </div>
+
+              {/* Auto-refresh toggle */}
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40">
+                <div>
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Auto-refresh token</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                    {autoRefresh
+                      ? `Silently re-issues the token 5 s before expiry using role: ${api.getTokenRole()}`
+                      : 'Token must be refreshed manually when it expires'}
+                  </p>
+                </div>
+                <button
+                  onClick={handleToggleAutoRefresh}
+                  className="ml-3 flex-shrink-0 text-gray-400 dark:text-gray-500 transition-colors"
+                  title={autoRefresh ? 'Disable auto-refresh' : 'Enable auto-refresh'}
+                >
+                  {autoRefresh
+                    ? <ToggleRight className="w-8 h-8 text-emerald-500" />
+                    : <ToggleLeft  className="w-8 h-8" />}
+                </button>
               </div>
 
               {/* Manual token paste */}
