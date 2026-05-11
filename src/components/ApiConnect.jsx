@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Wifi, WifiOff, RefreshCw, X, Key, Server, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import { useSubscription } from '../hooks/useSubscription';
@@ -137,8 +138,8 @@ export function ApiConnect() {
         </span>
       </button>
 
-      {/* Modal */}
-      {open && (
+      {/* Modal — rendered via portal so the sidebar's CSS transform doesn't clip it */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-[#1a1a1a] rounded-xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-800">
 
@@ -256,7 +257,7 @@ export function ApiConnect() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
