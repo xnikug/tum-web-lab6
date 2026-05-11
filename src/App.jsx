@@ -21,8 +21,8 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
-  const handleAddClick = () => { setEditingSubscription(null); setShowModal(true) }
-  const handleEditClick = (sub) => { setEditingSubscription(sub); setShowModal(true) }
+  const handleAddClick   = () => { setEditingSubscription(null); setShowModal(true) }
+  const handleEditClick  = (sub) => { setEditingSubscription(sub); setShowModal(true) }
   const handleCloseModal = () => { setShowModal(false); setEditingSubscription(null) }
 
   const renderContent = () => {
@@ -42,14 +42,15 @@ function AppContent() {
 }
 
 function App() {
-  const [state, dispatch]  = useReducer(subscriptionReducer, initialState)
-  const saveToStorage      = useLocalStorage('subscriptionState', initialState, dispatch)
-  const { theme }          = useTheme()
-  const [apiReady, setApiReady] = useState(false)
+  const [state, dispatch] = useReducer(subscriptionReducer, initialState)
+  const saveToStorage     = useLocalStorage('subscriptionState', initialState, dispatch)
+  const { theme }         = useTheme()
+
+  // 'idle' | 'connected' | 'expired' | 'error'
+  const [apiStatus, setApiStatus] = useState('idle')
 
   useEffect(() => { saveToStorage(state) }, [state, saveToStorage])
 
-  // Load initial data from backend when connected
   const loadFromApi = useCallback(async () => {
     if (!api.isConnected()) return
     try {
@@ -58,23 +59,27 @@ function App() {
         api.getApiKeys({ limit: 100 }),
         api.getApiUsage({ limit: 100 }),
       ])
+      // SYNC_FROM_API preserves currency/theme/filters — only updates data
       dispatch({
-        type: 'LOAD_STATE',
+        type: 'SYNC_FROM_API',
         payload: {
           subscriptions: subs.data,
           apiKeys:        keys.data,
           apiUsages:      usage.data,
         },
       })
-      setApiReady(true)
+      setApiStatus('connected')
     } catch (err) {
-      console.warn('Backend sync failed:', err.message)
+      if (err.status === 401) { api.clearToken(); setApiStatus('expired') }
+      else                    { setApiStatus('error') }
     }
   }, [])
 
   useEffect(() => { loadFromApi() }, [loadFromApi])
 
-  // Dispatch that mirrors every mutation to the backend
+  const handleApiConnect    = useCallback(() => { setApiStatus('connected'); loadFromApi() }, [loadFromApi])
+  const handleApiDisconnect = useCallback(() => setApiStatus('idle'), [])
+
   const apiDispatch = useCallback(async (action) => {
     if (!api.isConnected()) { dispatch(action); return }
 
@@ -129,14 +134,20 @@ function App() {
           dispatch(action)
       }
     } catch (err) {
-      console.error('API mutation failed:', err.message)
-      // Fall back to local-only update so the UI never freezes
+      if (err.status === 401) { api.clearToken(); setApiStatus('expired') }
+      // Always apply locally so the UI never freezes
       dispatch(action)
     }
   }, [])
 
   return (
-    <SubscriptionProvider state={state} dispatch={apiDispatch} onApiConnect={loadFromApi} apiReady={apiReady}>
+    <SubscriptionProvider
+      state={state}
+      dispatch={apiDispatch}
+      apiStatus={apiStatus}
+      onApiConnect={handleApiConnect}
+      onApiDisconnect={handleApiDisconnect}
+    >
       <div className={theme === 'dark' ? 'dark' : ''}>
         <AppContent />
       </div>

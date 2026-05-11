@@ -157,6 +157,16 @@ export const subscriptionReducer = (state, action) => {
       return action.payload;
     }
 
+    // Merges only data from backend — preserves currency, theme, filters, budget
+    case 'SYNC_FROM_API': {
+      return {
+        ...state,
+        subscriptions: action.payload.subscriptions ?? state.subscriptions,
+        apiKeys:       action.payload.apiKeys       ?? state.apiKeys,
+        apiUsages:     action.payload.apiUsages     ?? state.apiUsages,
+      };
+    }
+
     default:
       return state;
   }
